@@ -6,10 +6,50 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import ALL, Dash, Input, Output, State, callback_context, dcc, html
 from dash.exceptions import PreventUpdate
-
+import subprocess, logging
 from icons import icons
 
 
+def get_git_file_status(filename):
+    # Git의 status 명령을 실행하고 출력 결과를 파싱합니다.
+    git_status = subprocess.run(['git', 'status', '--porcelain', filename], stdout=subprocess.PIPE).stdout.decode(
+        'utf-8')
+    if not git_status:
+        # 파일이 Git 저장소에 없습니다.
+        return 'untracked'
+    elif git_status.startswith('??'):
+        # 파일이 Git 저장소에 추가되지 않았습니다.
+        return 'untracked'
+    elif git_status.startswith('A '):
+        # 파일이 추가되어 staging area에 있습니다.
+        return 'staged'
+    elif git_status.startswith('M '):
+        # 파일이 수정되어 staging area에 있습니다.
+        return 'staged'
+
+    elif git_status.startswith(' M'):
+        return 'modified'
+    else:
+        # 다른 상태는 모두 커밋된 파일입니다.
+        return 'committed'
+
+#git repository인가 아닌가..
+def is_git_repo(path):
+    if not os.path.isdir(path):
+        return False
+
+    os.chdir(path)
+    if not os.path.isdir(".git"):
+        return False
+
+    try:
+        git_status = os.popen("git status").read()
+        if "fatal" in git_status.lower():
+            return False
+        else:
+            return True
+    except:
+        return False
 def icon_file(extension, width=24, height=24):
     """Retrun an html.img of the svg icon for a given extension."""
     filetype = icons.get(extension)
@@ -109,27 +149,52 @@ def list_cwd_files(cwd):
     path = Path(cwd)
     all_file_details = []
     if path.is_dir():
-        files = sorted(os.listdir(path), key=str.lower)
-        for i, file in enumerate(files):
-            filepath = Path(file)
-            full_path=os.path.join(cwd, filepath.as_posix())
-            is_dir = Path(full_path).is_dir()
-            link = html.A([
-                html.Span(
-                file, id={'type': 'listed_file', 'index': i},
-                title=full_path,
-                style={'fontWeight': 'bold', 'fontSize': 18} if is_dir else {}
-            )], href='#')
-            details = file_info(Path(full_path))
-            details['filename'] = link
-            if is_dir:
-                details['extension'] = html.Img(
-                    src=app.get_asset_url('icons/default_folder.svg'),
-                    width=25, height=25)
-            else:
-                details['extension'] = icon_file(details['extension'][1:])
-            all_file_details.append(details)
-
+        if not is_git_repo(path):
+            files = sorted(os.listdir(path), key=str.lower)
+            for i, file in enumerate(files):
+                filepath = Path(file)
+                full_path=os.path.join(cwd, filepath.as_posix())
+                is_dir = Path(full_path).is_dir()
+                link = html.A([
+                    html.Span(
+                    file, id={'type': 'listed_file', 'index': i},
+                    title=full_path,
+                    style={'fontWeight': 'bold', 'fontSize': 18} if is_dir else {}
+                )], href='#')
+                details = file_info(Path(full_path))
+                details['filename'] = link
+                if is_dir:
+                    details['extension'] = html.Img(
+                        src=app.get_asset_url('icons/default_folder.svg'),
+                        width=25, height=25)
+                else:
+                    details['extension'] = icon_file(details['extension'][1:])
+                all_file_details.append(details)
+        #git repository인 경우..
+        else:
+            files = sorted(os.listdir(path), key=str.lower)
+            for i, file in enumerate(files):
+                filepath = Path(file)
+                full_path = os.path.join(cwd, filepath.as_posix())
+                is_dir = Path(full_path).is_dir()
+                link = html.A([
+                    html.Span(
+                        file, id={'type': 'listed_file', 'index': i},
+                        title=full_path,
+                        style={'fontWeight': 'bold', 'fontSize': 18} if is_dir else {}
+                    )], href='#')
+                details = file_info(Path(full_path))
+                details['filename'] = link
+                if get_git_file_status(file) == 'untracked':
+                    details['extension'] = icon_file("untracked")
+                elif get_git_file_status(file) == 'staged':
+                    details['extension'] = icon_file("staged")
+                elif get_git_file_status(file) == 'modified':
+                    details['extension'] = icon_file("modified")
+                #committed
+                else:
+                    details['extension'] = icon_file("committed")
+                all_file_details.append(details)
     df = pd.DataFrame(all_file_details)
     df = df.rename(columns={"extension": ''})
     table = dbc.Table.from_dataframe(df, striped=False, bordered=False,
@@ -149,4 +214,5 @@ def store_clicked_file(n_clicks, title):
     return title[index]
 
 if __name__ == '__main__':
+    app.logger.setLevel(logging.INFO)
     app.run_server(debug=True)
