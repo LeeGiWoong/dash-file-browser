@@ -1,7 +1,7 @@
 import datetime
 import os
 from pathlib import Path
-
+import dash_mantine_components as dmc  # check box -leemarshal
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import ALL, Dash, Input, Output, State, callback_context, dcc, html
@@ -9,24 +9,23 @@ from dash.exceptions import PreventUpdate
 import subprocess, logging
 from icons import icons
 
-
 def get_git_file_status(filename):
     # Git의 status 명령을 실행하고 출력 결과를 파싱합니다.
     git_status = subprocess.run(['git', 'status', '--porcelain', filename], stdout=subprocess.PIPE).stdout.decode(
         'utf-8')
-    if not git_status:
-        # 파일이 Git 저장소에 없습니다.
-        return 'untracked'
-    elif git_status.startswith('??'):
+    committed = subprocess.run(['git', 'status', '--porcelain', filename], stdout=subprocess.PIPE)
+
+    if git_status.startswith('??'):
         # 파일이 Git 저장소에 추가되지 않았습니다.
         return 'untracked'
+    elif git_status.startswith('MM'):
+        return 'modified'
     elif git_status.startswith('A '):
         # 파일이 추가되어 staging area에 있습니다.
         return 'staged'
     elif git_status.startswith('M '):
         # 파일이 수정되어 staging area에 있습니다.
         return 'staged'
-
     elif git_status.startswith(' M'):
         return 'modified'
     else:
@@ -74,6 +73,7 @@ def file_info(path):
     """
     file_stat = path.stat()
     d = {
+        'chbox': False,  # check box 추가하려고 했는데 이렇게 하는게 맞는지는 모르겠음
         'extension': path.suffix if not path.name.startswith('.') else path.name,
         'filename': path.name,
         # 'fullpath': str(path.absolute()),
@@ -121,11 +121,19 @@ app.layout = html.Div([
                                   id='parent_dir'))),
             html.H3([html.Code(os.getcwd(), id='cwd')]),
                     html.Br(), html.Br(),
+            dbc.Col([html.Button('git init', id='gitinit-val', n_clicks=0,disabled = False),  # git init button
+                html.Button('not git repo', id='is_gitrepo', disabled=True),  # is git repo button, but disabled
+                html.Button('check', id='check', value = '', style={"margin-left": "15px"}),
+                html.Button('add', id='add',  disabled = True,style={"margin-left": "15px"}),
+                html.Button('restore', id='restore',  disabled = True,style={"margin-left": "15px"}),
+                html.Button('unstaged', id='unstaged',  disabled = True,style={"margin-left": "15px"}),
+                html.Button('untracked', id='untracked',  disabled = True,style={"margin-left": "15px"}),
+                html.Button('delete', id='delete',  disabled = True,style={"margin-left": "15px"})]),
             html.Div(id='cwd_files',
                      style={'height': 500, 'overflow': 'scroll'}),
         ], lg=10, sm=11, md=10)
     ])
-] + [html.Br() for _ in range(15)])
+] + [html.Br() for _ in range(15)] + [ html.Div(id='dummy2')])
 
 
 @app.callback(
@@ -173,6 +181,7 @@ def list_cwd_files(cwd):
         #git repository인 경우..
         else:
             files = sorted(os.listdir(path), key=str.lower)
+
             for i, file in enumerate(files):
                 filepath = Path(file)
                 full_path = os.path.join(cwd, filepath.as_posix())
@@ -183,7 +192,9 @@ def list_cwd_files(cwd):
                         title=full_path,
                         style={'fontWeight': 'bold', 'fontSize': 18} if is_dir else {}
                     )], href='#')
+
                 details = file_info(Path(full_path))
+                details['chbox'] = dmc.Checkbox(id={'type': 'dynamic-checkbox', 'index': i}, checked=False)
                 details['filename'] = link
                 if get_git_file_status(file) == 'untracked':
                     details['extension'] = icon_file("untracked")
@@ -191,16 +202,30 @@ def list_cwd_files(cwd):
                     details['extension'] = icon_file("staged")
                 elif get_git_file_status(file) == 'modified':
                     details['extension'] = icon_file("modified")
-                #committed
-                else:
+                elif get_git_file_status(file) == 'committed':
                     details['extension'] = icon_file("committed")
+
                 all_file_details.append(details)
     df = pd.DataFrame(all_file_details)
     df = df.rename(columns={"extension": ''})
     table = dbc.Table.from_dataframe(df, striped=False, bordered=False,
                                      hover=True, size='sm')
     return html.Div(table)
+@app.callback(
+    Output("gitinit-val", "hidden"),  # return 할게 없어서 dummy1 사용
+    Output("is_gitrepo", "children"),
+    Input('gitinit-val', 'n_clicks'),
+    Input('cwd', 'children'),
 
+)
+def git_init(n_clicks, cwd):
+    path = Path(cwd)
+    if is_git_repo(path):
+        return True, 'git repository'
+
+    if n_clicks == 1:
+        os.system("cd " + str(path) + " && git init")
+    return False, 'not git repostory'
 
 @app.callback(
     Output('stored_cwd', 'data'),
@@ -212,6 +237,134 @@ def store_clicked_file(n_clicks, title):
     ctx = callback_context
     index = ctx.triggered_id['index']
     return title[index]
+#git_add -leemarshal
+@app.callback(
+    Output('add', 'disabled'),
+    Output('restore', 'disabled'),
+    Output('unstaged', 'disabled'),
+    Output('untracked', 'disabled'),
+    Output('delete', 'disabled'),
+    Output('check', 'n_clicks'),
+    Input('check', 'n_clicks'),
+    State({'type': 'dynamic-checkbox', 'index': ALL}, 'checked'),
+    State('cwd', 'children')
+)
+def check(n_clicks, checked, cwd):
+    files = sorted(os.listdir(cwd), key=str.lower)
+    if n_clicks is None:
+        raise PreventUpdate
+    update_files = []
+    if n_clicks == 1:
+        for i in range(len(checked)):
+            if checked[i]:
+                update_files.append(files[i])
+
+    states = [get_git_file_status(i) for i in update_files]
+    #modified --> git add + git restore
+    if set(states) and set(states).issubset(set(['modified'])):
+        return False, False, True, True, True, 0
+    # update할 파일이 untracked인 경우 or modified인경우 ==> git add 가능
+    elif set(states) and set(states).issubset(set(['modified', 'untracked'])):
+        return False, True, True, True, True, 0
+    # git restore
+    # unstaged
+    elif set(states) and set(states).issubset(set(['staged'])):
+        return True, True, False, True, True, 0
+    # untracked
+    elif set(states) and set(states).issubset(set(['committed'])):
+        return True, True, True, False, False, 0
+    return True, True, True, True, True, 0
+
+@app.callback(
+    Output('add', 'n_clicks'),
+    Input('check', 'value'),
+    State({'type': 'dynamic-checkbox', 'index': ALL}, 'checked'),
+    State('cwd', 'children'),
+    Input('add', 'n_clicks')
+)
+def git_add(value, checked, cwd,n_clicks):
+    files = sorted(os.listdir(cwd), key=str.lower)
+    staged = []
+    for i in range(len(checked)):
+        if checked[i] == True:
+            staged.append(files[i])
+    if n_clicks == 1:
+        for file in staged:
+            file = '"' + file + '"'
+            os.system("cd " + str(Path(cwd)) + " && git add " + file)
+    return 0
+@app.callback(
+    Output('restore', 'n_clicks'),
+    Input('check', 'value'),
+    State({'type': 'dynamic-checkbox', 'index': ALL}, 'checked'),
+    State('cwd', 'children'),
+    Input('restore', 'n_clicks')
+)
+def git_restore(value, checked, cwd,n_clicks):
+    files = sorted(os.listdir(cwd), key=str.lower)
+    staged = []
+    for i in range(len(checked)):
+        if checked[i] == True:
+            staged.append(files[i])
+    if n_clicks == 1:
+        for file in staged:
+            os.system("cd " + str(Path(cwd)) + " && git restore " + file)
+    return 0
+
+@app.callback(
+    Output('unstaged', 'n_clicks'),
+    Input('check', 'value'),
+    State({'type': 'dynamic-checkbox', 'index': ALL}, 'checked'),
+    State('cwd', 'children'),
+    Input('unstaged', 'n_clicks')
+)
+def git_unstaged(value, checked, cwd,n_clicks):
+    files = sorted(os.listdir(cwd), key=str.lower)
+    staged = []
+    for i in range(len(checked)):
+        if checked[i] == True:
+            staged.append(files[i])
+    if n_clicks == 1:
+        for file in staged:
+            os.system("cd " + str(Path(cwd)) + " && git restore --staged " + file)
+    return 0
+
+@app.callback(
+    Output('untracked', 'n_clicks'),
+    Input('check', 'value'),
+    State({'type': 'dynamic-checkbox', 'index': ALL}, 'checked'),
+    State('cwd', 'children'),
+    Input('untracked', 'n_clicks')
+)
+def git_untracked(value, checked, cwd,n_clicks):
+    files = sorted(os.listdir(cwd), key=str.lower)
+    staged = []
+    for i in range(len(checked)):
+        if checked[i] == True:
+            staged.append(files[i])
+    if n_clicks == 1:
+        for file in staged:
+            os.system("cd " + str(Path(cwd)) + " && git rm --cached " + file)
+    return 0
+
+
+@app.callback(
+    Output('delete', 'n_clicks'),
+    Input('check', 'value'),
+    State({'type': 'dynamic-checkbox', 'index': ALL}, 'checked'),
+    State('cwd', 'children'),
+    Input('delete', 'n_clicks')
+)
+def git_untracked(value, checked, cwd,n_clicks):
+    files = sorted(os.listdir(cwd), key=str.lower)
+    staged = []
+    for i in range(len(checked)):
+        if checked[i] == True:
+            staged.append(files[i])
+    if n_clicks == 1:
+        for file in staged:
+            os.system("cd " + str(Path(cwd)) + " && git rm --cached " + file)
+    return 0
 
 if __name__ == '__main__':
     app.logger.setLevel(logging.INFO)
