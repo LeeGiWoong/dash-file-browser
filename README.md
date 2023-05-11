@@ -39,7 +39,7 @@ The service supports the version controlling of a git repository.
     *   Once the user confirms the commit, it commits the changes to a repository (git commit)
     *   After the commit, the status of the staged files is changed as committed.
 
-
+## Important Notes
 - Programming language: Python과 dash 프레임워크를 사용
 - Platform to run: Web
 - 
