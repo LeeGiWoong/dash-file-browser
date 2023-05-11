@@ -59,9 +59,6 @@ A simple file browser for Plotly Dash applications.
 - Show folder icons for differentiation
 - Expose files and folder as objects to be manipulated by your Dash app
 
-![](dash_file_browser.gif)
-
-
 ## To run: 
 
 ```bash
