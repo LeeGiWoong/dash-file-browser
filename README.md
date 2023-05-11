@@ -23,9 +23,9 @@ current working directory (git init).
 
 ## Feature #3 : Version controlling
 1. 원하는 command를 위해서는 
-1) 해당하는 파일을 checkbox로 check한다. 
-2) [check] 버튼을 누른다. 
-3) 가능한 command들이 활성화된다.
+- 1) 해당하는 파일을 checkbox로 check한다. 
+- 2) [check] 버튼을 누른다. 
+- 3) 가능한 command들이 활성화된다.
 The service supports the version controlling of a git repository. 
 -   Files with different status have a different mark on their icon.
 -   It provides a different menu depending on the status of a selected file. 
