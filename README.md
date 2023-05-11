@@ -68,9 +68,4 @@ A simple file browser for Plotly Dash applications.
 pip install -r requirements
 
 python app.py
-
-# OR with gunicorn (needs to also be installed):
-
-gunicorn app:server
- 
 ```
