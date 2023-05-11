@@ -13,7 +13,7 @@ and extension.
 browser.
 
 ## Feature #2: Git repository creation
-1. [not git repo] 인 경우, [git init] 버튼을 누르면 Git 저장소와 해당 디렉토리에 .git이라는 하위 디렉토리가 생성된다.
+1. [not git repo] 인 경우, [git init] 버튼을 누르면 Git 저장소와 해당 디렉토리에 .git이라는 하위 디렉토리를 생성할 수 있다.
 2. [git repo] 인 경우, [git init] 버튼은 비활성화 상태이다.
 ### The service supports to turn any local directory into a git repository.
 -   It provides a menu for a git repository creation only if a current directory in the browser is 
