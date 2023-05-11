@@ -12,14 +12,14 @@ and extension.
 - (Optional) A user can create, delete, copy, move, and execute files and directories on the 
 browser.
 
-Feature #2: Git repository creation
+## Feature #2: Git repository creation
 The service supports to turn any local directory into a git repository.
 -   It provides a menu for a git repository creation only if a current directory in the browser is 
 not managed by git yet.
 -   Once the repository creation is requested, the service creates a new git repository for the 
 current working directory (git init).
 
-Feature #3 : Version controlling
+## Feature #3 : Version controlling
 The service supports the version controlling of a git repository. 
 -   Files with different status have a different mark on their icon.
 -   It provides a different menu depending on the status of a selected file. 
