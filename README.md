@@ -25,11 +25,11 @@ The service supports the version controlling of a git repository.
 -   It provides a different menu depending on the status of a selected file. 
 *   For untracked files:
     *   Adding the new files into a staging area (untracked -> staged; git add)
-*   For modified files
-    *   Adding the modified files into a staging area (modified -> staged; git add)
-    *   Undoing the modification (modified -> unmodified; git restore)
-*   For staged files
-    *   Unstaging changes (staged -> modified or untracked; git restore --staged)
++   For modified files
+    +   Adding the modified files into a staging area (modified -> staged; git add)
+    +   Undoing the modification (modified -> unmodified; git restore)
+-   For staged files
+    -   Unstaging changes (staged -> modified or untracked; git restore --staged)
 *   For committed or unmodified files
     *   Untracking files (committed -> untracked; git rm --cached)
     *   Deleting files (committed -> staged; git rm)
