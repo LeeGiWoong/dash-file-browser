@@ -23,21 +23,21 @@ Feature #3 : Version controlling
 The service supports the version controlling of a git repository. 
 -   Files with different status have a different mark on their icon.
 -   It provides a different menu depending on the status of a selected file. 
-          For untracked files:
-       Adding the new files into a staging area (untracked -> staged; git add)
-          For modified files
-       Adding the modified files into a staging area (modified -> staged; git add)
-       Undoing the modification (modified -> unmodified; git restore)
-          For staged files
-       Unstaging changes (staged -> modified or untracked; git restore --staged)
-          For committed or unmodified files
-       Untracking files (committed -> untracked; git rm --cached)
-       Deleting files (committed -> staged; git rm)
-       Renaming files (committed -> staged; git mv)
+*   For untracked files:
+    *   Adding the new files into a staging area (untracked -> staged; git add)
+*   For modified files
+    *   Adding the modified files into a staging area (modified -> staged; git add)
+    *   Undoing the modification (modified -> unmodified; git restore)
+*   For staged files
+    *   Unstaging changes (staged -> modified or untracked; git restore --staged)
+*   For committed or unmodified files
+    *   Untracking files (committed -> untracked; git rm --cached)
+    *   Deleting files (committed -> staged; git rm)
+    *   Renaming files (committed -> staged; git mv)
 -   It provides a separate menu for committing staged changes. 
-           When a user clicks the commit menu, it shows the list of staged changes.
-           Once the user confirms the commit, it commits the changes to a repository (git commit)
-           After the commit, the status of the staged files is changed as committed.
+    *   When a user clicks the commit menu, it shows the list of staged changes.
+    *   Once the user confirms the commit, it commits the changes to a repository (git commit)
+    *   After the commit, the status of the staged files is changed as committed.
 
 
 - Programming language: Python과 dash 프레임워크를 사용
