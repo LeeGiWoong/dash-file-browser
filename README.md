@@ -52,7 +52,7 @@ A simple file browser for Plotly Dash applications.
 ![](dash_file_browser.gif)
 
 
-To run: 
+## To run: 
 
 ```bash
 pip install -r requirements
