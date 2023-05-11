@@ -22,7 +22,7 @@ not managed by git yet.
 current working directory (git init).
 
 ## Feature #3 : Version controlling
-1.  
+1. [commit]
 The service supports the version controlling of a git repository. 
 -   Files with different status have a different mark on their icon.
 -   It provides a different menu depending on the status of a selected file. 
