@@ -13,8 +13,8 @@ and extension.
 browser.
 
 ## Feature #2: Git repository creation
-1. [not git repo] 인 경우, [git init] 버튼을 누르면 Git 저장소와 해당 디렉토리에 .git이라는 하위 디렉토리를 생성할 수 있다.
-2. [git repo] 인 경우, [git init] 버튼은 비활성화 상태이다.
+1. [not git repo] 인 경우, [git init] 버튼을 누르면 Git 저장소와 해당 디렉토리에 .git이라는 하위 디렉토리를 생성할 수 있습니다.
+2. [git repo] 인 경우, [git init] 버튼은 비활성화 상태입니다.
 ### The service supports to turn any local directory into a git repository.
 -   It provides a menu for a git repository creation only if a current directory in the browser is 
 not managed by git yet.
@@ -23,13 +23,13 @@ current working directory (git init).
 
 ## Feature #3 : Version controlling
 1. 원하는 command를 실행하기 위해서는 
-- 1) 해당하는 파일을 checkbox로 check한다. 
-- 2) [check] 버튼을 누른다. 
-- 3) 가능한 command들이 활성화된다.
-- 단, [commit] 버튼의 경우, 위의 과정을 따르지 않아도 된다.
+- 1) 해당하는 파일을 checkbox로 check합니다. 
+- 2) [check] 버튼을 누릅니다. 
+- 3) 가능한 command butoon들이 활성화됩니다.
+- 단, [commit] 버튼의 경우, 위의 과정을 따르지 않아도 됩니다.
 
-- commit message를 적은 뒤, [commit] 버튼을 누르면 git status 정보를 포함한 팝업창이 생긴다.
-- 확인을 누르면 git commit command가 실행되고, 취소를 누르면 변화하지 않는다.
+- commit message를 적은 뒤, [commit] 버튼을 누르면 git status 정보를 포함한 팝업창이 생깁니다.
+- 확인을 누르면 git commit command가 실행되고, 취소를 누르면 변화하지 않습니다.
 ### The service supports the version controlling of a git repository. 
 -   Files with different status have a different mark on their icon.
 -   It provides a different menu depending on the status of a selected file. 
