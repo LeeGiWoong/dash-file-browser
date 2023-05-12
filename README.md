@@ -25,7 +25,7 @@ current working directory (git init).
 1. 원하는 command를 실행하기 위해서는 
 - 1) 해당하는 파일을 checkbox로 check합니다. 
 - 2) [check] 버튼을 누릅니다. 
-- 3) 가능한 command butoon들이 활성화됩니다.
+- 3) 가능한 command button들이 활성화됩니다.
 - 단, [commit] 버튼의 경우, 위의 과정을 따르지 않아도 됩니다.
 
 - commit message를 적은 뒤, [commit] 버튼을 누르면 git status 정보를 포함한 팝업창이 생깁니다.
